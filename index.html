@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="减脂保肌">
+<meta name="theme-color" content="#0e0f13">
+<title>减脂保肌 · 8周计划</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --card: #1c1f29;
+    --border: #2a2e3d;
+    --accent: #e8ff47;
+    --accent2: #47c6ff;
+    --red: #ff4d6d;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --chest: #ff6b35;
+    --back: #47c6ff;
+    --legs: #a78bfa;
+    --cardio: #34d399;
+    --shoulder: #fbbf24;
+    --tab-height: 60px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    overscroll-behavior: none;
+  }
+
+  /* ===== App Shell ===== */
+  #app { display: flex; flex-direction: column; height: 100%; }
+
+  /* ===== Top Status Bar ===== */
+  .status-bar {
+    height: var(--safe-top);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* ===== Scroll Pages ===== */
+  .pages { flex: 1; overflow: hidden; position: relative; }
+  .page {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px 0;
+    display: none;
+  }
+  .page.active { display: block; }
+  .page-inner { padding-bottom: calc(var(--tab-height) + var(--safe-bottom) + 24px); }
+
+  /* ===== Tab Bar ===== */
+  .tab-bar {
+    flex-shrink: 0;
+    background: rgba(22, 24, 31, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+    height: calc(var(--tab-height) + var(--safe-bottom));
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding-top: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .tab-item:active { opacity: 0.6; }
+  .tab-icon { font-size: 22px; line-height: 1; }
+  .tab-label { font-size: 10px; color: var(--muted); transition: color 0.15s; }
+  .tab-item.active .tab-label { color: var(--accent); }
+  .tab-item.active .tab-icon { filter: brightness(1); }
+
+  /* ===== Section Headers ===== */
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+  /* ===== TODAY PAGE ===== */
+  .today-hero {
+    background: linear-gradient(135deg, #1c1f29 0%, #1a2035 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .today-label { font-size: 11px; letter-spacing: 3px; color: var(--accent); margin-bottom: 4px; }
+  .today-date { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .today-workout-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .today-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .badge-upper { background: rgba(255,107,53,0.15); color: var(--chest); }
+  .badge-lower { background: rgba(167,139,250,0.15); color: var(--legs); }
+  .badge-rest { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+  .today-checkin-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--accent);
+    color: #0e0f13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .today-checkin-btn.done {
+    background: rgba(232,255,71,0.1);
+    color: var(--accent);
+    border: 2px solid var(--accent);
+  }
+  .today-checkin-btn:active { transform: scale(0.97); }
+
+  .today-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  .progress-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .progress-pct { color: var(--accent); font-weight: 700; font-size: 15px; }
+  .progress-bar-bg { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .today-tip {
+    background: rgba(232,255,71,0.05);
+    border: 1px solid rgba(232,255,71,0.15);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 12px;
+    color: var(--accent);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  /* ===== SCHEDULE PAGE ===== */
+  .week-section { margin-bottom: 22px; }
+  .week-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .week-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+  .week-title { font-size: 13px; color: var(--text); font-weight: 500; }
+  .week-line { flex: 1; height: 1px; background: var(--border); }
+  .week-count { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .day-card.done { border-color: var(--accent); }
+  .day-main { display: flex; align-items: center; padding: 14px; gap: 12px; cursor: pointer; }
+  .day-checkbox {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .day-card.done .day-checkbox { background: var(--accent); border-color: var(--accent); color: #000; }
+  .day-date { font-size: 11px; color: var(--muted); flex-shrink: 0; width: 32px; text-align: center; line-height: 1.4; }
+  .day-info { flex: 1; min-width: 0; }
+  .day-top { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+  .day-name { font-weight: 500; font-size: 14px; }
+  .day-type-badge { font-size: 10px; padding: 1px 7px; border-radius: 99px; font-weight: 500; flex-shrink: 0; }
+  .day-exercises { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-arrow { color: var(--muted); font-size: 11px; flex-shrink: 0; transition: transform 0.2s; }
+  .day-card.expanded .day-arrow { transform: rotate(90deg); }
+
+  .day-detail { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .day-card.expanded .day-detail { display: block; }
+  .detail-section { margin-top: 12px; }
+  .detail-title { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .exercise-list { display: flex; flex-direction: column; gap: 8px; }
+  .exercise-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; }
+  .ex-num { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--accent); width: 18px; flex-shrink: 0; line-height: 1.2; }
+  .ex-body { flex: 1; }
+  .ex-name { color: var(--text); line-height: 1.5; }
+  .ex-note { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .ex-sets { font-size: 11px; color: #000; background: var(--accent); padding: 2px 8px; border-radius: 6px; flex-shrink: 0; font-weight: 700; white-space: nowrap; }
+  .meal-box { background: var(--surface); border-radius: 10px; padding: 10px 12px; }
+  .meal-row { display: flex; gap: 8px; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-time { color: var(--muted); flex-shrink: 0; width: 32px; font-size: 11px; }
+  .meal-content { color: var(--text); flex: 1; line-height: 1.5; }
+  .tip-box {
+    background: rgba(232,255,71,0.05);
+    border: 1px solid rgba(232,255,71,0.15);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+  .milestone-box {
+    background: rgba(71,198,255,0.07);
+    border: 1px solid rgba(71,198,255,0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--accent2);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* ===== BODY TRACK PAGE ===== */
+  .body-baseline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .base-card {
+    background: rgba(71,198,255,0.06);
+    border: 1px solid rgba(71,198,255,0.18);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .base-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .base-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .base-delta { font-size: 12px; margin-top: 6px; font-weight: 600; }
+  .delta-down { color: var(--cardio); }
+  .delta-up { color: var(--red); }
+  .delta-zero { color: var(--muted); }
+
+  .track-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .track-form-title { font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+  .form-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .form-row select, .form-row input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 12px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    flex: 1;
+    -webkit-appearance: none;
+  }
+  .form-row input { text-align: center; }
+  .track-add-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0e0f13;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    transition: transform 0.15s;
+  }
+  .track-add-btn:active { transform: scale(0.97); }
+
+  .log-list {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .log-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-week { font-family: 'Bebas Neue', sans-serif; color: var(--accent2); width: 40px; font-size: 15px; }
+  .log-data { flex: 1; font-size: 13px; color: var(--text); }
+  .log-del { color: var(--muted); font-size: 18px; padding: 4px 8px; cursor: pointer; }
+  .log-del:active { color: var(--red); }
+  .log-empty { padding: 24px 16px; text-align: center; font-size: 12px; color: var(--muted); }
+
+  /* ===== GOAL PAGE ===== */
+  .goal-hero {
+    text-align: center;
+    padding: 24px 16px;
+    margin-bottom: 14px;
+  }
+  .goal-hero-label { font-size: 11px; letter-spacing: 4px; color: var(--accent); margin-bottom: 8px; }
+  .goal-hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 12vw, 70px);
+    line-height: 1;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .goal-hero-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  .start-date-banner {
+    text-align: center;
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(71,198,255,0.08);
+    border: 1px solid rgba(71,198,255,0.2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .goal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .goal-item-card {
+    background: rgba(232,255,71,0.05);
+    border: 1px solid rgba(232,255,71,0.15);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .goal-item-label { font-size: 10px; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; }
+  .goal-item-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .legend {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .reset-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .reset-card-title { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .reset-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+  }
+  .reset-btn:active { background: rgba(255,77,109,0.1); }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--tab-height) + var(--safe-bottom) + 16px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--accent);
+    color: #0e0f13;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 99px;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="status-bar"></div>
+
+  <div class="pages">
+    <!-- TODAY -->
+    <div class="page active" id="page-today">
+      <div class="page-inner">
+        <div class="today-stats">
+          <div class="stat-card">
+            <div class="stat-number" id="done-count">0</div>
+            <div class="stat-label">已打卡</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">32</div>
+            <div class="stat-label">计划总天</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="streak-count">0</div>
+            <div class="stat-label">连续打卡</div>
+          </div>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-header">
+            <span>第一阶段进度</span>
+            <span class="progress-pct" id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="today-hero" id="today-hero">
+          <div class="today-label">TODAY</div>
+          <div class="today-date" id="today-date-txt"></div>
+          <div class="today-workout-name" id="today-workout-name">休息日</div>
+          <div id="today-badge"></div>
+          <div id="today-checkin-wrap"></div>
+        </div>
+
+        <div class="today-tip" id="today-tip"></div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule">
+      <div class="page-inner">
+        <div class="page-title">训练计划</div>
+        <div class="page-sub">8周 · 每周4天 · 上肢/下肢分化</div>
+        <div id="weeks-container"></div>
+      </div>
+    </div>
+
+    <!-- BODY TRACK -->
+    <div class="page" id="page-body">
+      <div class="page-inner">
+        <div class="page-title">体重 & 腰围</div>
+        <div class="page-sub">建议固定每周一早晨空腹记录</div>
+
+        <div class="body-baseline">
+          <div class="base-card">
+            <div class="base-val" id="cur-weight">103.0</div>
+            <div class="base-lbl">当前体重 kg</div>
+            <div class="base-delta delta-zero" id="weight-delta">起点</div>
+          </div>
+          <div class="base-card">
+            <div class="base-val" id="cur-waist">105.0</div>
+            <div class="base-lbl">当前腰围 cm</div>
+            <div class="base-delta delta-zero" id="waist-delta">起点</div>
+          </div>
+        </div>
+
+        <div class="track-form">
+          <div class="track-form-title">记录新数据</div>
+          <div class="form-row">
+            <select id="track-week">
+              <option value="1">第 1 周</option>
+              <option value="2">第 2 周</option>
+              <option value="3">第 3 周</option>
+              <option value="4">第 4 周</option>
+              <option value="5">第 5 周</option>
+              <option value="6">第 6 周</option>
+              <option value="7">第 7 周</option>
+              <option value="8">第 8 周</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <input type="number" id="track-w" placeholder="体重 kg" step="0.1" inputmode="decimal">
+            <input type="number" id="track-wa" placeholder="腰围 cm" step="0.1" inputmode="decimal">
+          </div>
+          <button class="track-add-btn" onclick="addLog()">记录</button>
+        </div>
+
+        <div class="log-list" id="track-log">
+          <div class="log-empty">还没有记录。起点：103kg / 105cm</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOAL -->
+    <div class="page" id="page-goal">
+      <div class="page-inner">
+        <div class="goal-hero">
+          <div class="goal-hero-label">BURN FAT · KEEP MUSCLE</div>
+          <div class="goal-hero-title">减脂保肌<br>8周计划</div>
+          <div class="goal-hero-sub">每周4天 · 上肢/下肢分化 · 8周第一阶段</div>
+        </div>
+
+        <div class="start-date-banner">📅 第一阶段：2026年6月8日（周一）→ 8月1日（周五）· 共8周</div>
+
+        <div class="goal-grid">
+          <div class="goal-item-card">
+            <div class="goal-item-label">训练策略</div>
+            <div class="goal-item-val">力量保肌 + 有氧燃脂</div>
+          </div>
+          <div class="goal-item-card">
+            <div class="goal-item-label">每组次数</div>
+            <div class="goal-item-val">12–15次，中等重量</div>
+          </div>
+          <div class="goal-item-card">
+            <div class="goal-item-label">饮食策略</div>
+            <div class="goal-item-val">蛋白≥180g · 总热量~2300 · 外食版</div>
+          </div>
+          <div class="goal-item-card">
+            <div class="goal-item-label">8周目标</div>
+            <div class="goal-item-val">减 6-8kg · 腰围 -5到-8cm · 保肌</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--chest)"></div>
+            <span>上肢 A — 推拉肩臂（周一/周四）</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--legs)"></div>
+            <span>下肢 B — 腿+核心（周二/周五）</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--cardio)"></div>
+            <span>每次力量后 15min 快走（第8周20min）</span>
+          </div>
+        </div>
+
+        <div class="reset-card">
+          <div class="reset-card-title">危险操作</div>
+          <button class="reset-btn" onclick="resetAll()">重置所有打卡记录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active" data-tab="today" onclick="switchTab('today')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">今日</div>
+    </div>
+    <div class="tab-item" data-tab="schedule" onclick="switchTab('schedule')">
+      <div class="tab-icon">📋</div>
+      <div class="tab-label">计划</div>
+    </div>
+    <div class="tab-item" data-tab="body" onclick="switchTab('body')">
+      <div class="tab-icon">⚖️</div>
+      <div class="tab-label">体测</div>
+    </div>
+    <div class="tab-item" data-tab="goal" onclick="switchTab('goal')">
+      <div class="tab-icon">🎯</div>
+      <div class="tab-label">目标</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Data =====
+const upperA = [
+  { name:"跑步机快走热身", sets:"5分钟", note:"坡度5，激活身体" },
+  { name:"① 水平推：杠铃卧推 / 哑铃平板卧推", sets:"4×12-15", note:"二选一。先轻重量热身1组，最后2-3次接近力竭" },
+  { name:"② 纵向拉：高位下拉 / 哑铃单臂划船", sets:"4×12-15", note:"二选一。没下拉机就做单臂划船，撑凳屈身、肘贴身拉到腰侧" },
+  { name:"③ 肩推：哑铃坐姿肩推 / 杠铃站姿肩推", sets:"3×12-15", note:"二选一。不耸肩，核心收紧" },
+  { name:"④ 水平拉：哑铃俯身划船 / 杠铃俯身划船", sets:"3×12-15", note:"二选一。屈髋背平，肘贴身拉到腰侧" },
+  { name:"⑤ 手臂：哑铃弯举 + 三头(绳索下压 / 哑铃过顶臂屈伸)", sets:"各3×12-15", note:"弯举固定，三头看器械二选一" },
+  { name:"⑥ 护肩颈：面拉 / 哑铃俯身反向飞鸟", sets:"3×15", note:"二选一。专治肩颈僵硬，练后肩。没绳索就用哑铃反向飞鸟" },
+  { name:"跑步机快走收尾", sets:"15分钟", note:"坡度6-8，心率120-135" },
+];
+const lowerB = [
+  { name:"跑步机快走热身", sets:"5分钟", note:"坡度5" },
+  { name:"① 深蹲：杠铃深蹲 / 史密斯架深蹲", sets:"4×12-15", note:"二选一。下蹲到大腿平行地面，膝盖对准脚尖方向" },
+  { name:"② 后链：罗马尼亚硬拉（哑铃 / 杠铃皆可）", sets:"3×12-15", note:"前2周轻重量重学动作，屈髋送臀，背全程挺直" },
+  { name:"③ 腿部辅助：腿举机 / 哑铃箭步蹲", sets:"3×12-15", note:"二选一。没腿举机就做哑铃箭步蹲(弓步走)，任何场地都能做" },
+  { name:"④ 核心：平板支撑", sets:"3×30-45秒", note:"核心收紧不塌腰" },
+  { name:"跑步机快走收尾", sets:"15分钟", note:"坡度6-8，稳定燃脂" },
+];
+const upperA20 = upperA.map(e => e.name.includes("收尾") ? {...e, sets:"20分钟"} : e);
+const lowerB20 = lowerB.map(e => e.name.includes("收尾") ? {...e, sets:"20分钟"} : e);
+
+const mealA = [
+  { time:"早餐", content:"无糖希腊酸奶一大盒 + 香蕉 + 黑咖啡（约30g蛋白）" },
+  { time:"午餐", content:"烤鸡胸/烤鱼便当，米饭半盒~2/3盒 + 蛋白饮料1瓶" },
+  { time:"加餐", content:"无糖希腊酸奶 + 水果 或 蛋白粉1勺" },
+  { time:"晚餐", content:"family rest. 烤鸡/烤鱼/牛排定食，米饭半碗，蔬菜随意" },
+];
+const mealB = [
+  { time:"早餐", content:"便利店サラダチキン1块 + 饭团1个 + 黑咖啡（约28g蛋白）" },
+  { time:"午餐", content:"そば/荞麦面 + 加鸡蛋或纳豆或鸡肉 + 蛋白饮料补到40g" },
+  { time:"加餐", content:"蛋白粉1勺 或 无糖酸奶" },
+  { time:"晚餐", content:"练腿日多吃点：牛排/鸡肉定食，米饭一碗，蔬菜随意" },
+];
+const tips = [
+  "💡 第一周只求把动作做标准，重量宁轻勿重。罗马尼亚硬拉用很轻的重量重新找屈髋送臀的感觉。收尾有氧不能省。",
+  "💡 动作熟了，可以小幅加重，仍保证12-15次能完成。注意每次都做面拉，缓解肩颈僵硬。",
+  "💡 卧推/深蹲尝试比上周加2.5-5kg。力量回升期，你会明显感觉到进步——这是肌肉记忆在工作。",
+  "💡 第4周可能遇到第一个平台或疲劳，正常。睡够7小时，训练强度别降。腰围这周大概率开始明显往下走。",
+  "💡 半程节点！周末称体重+量腰围，和6/8对比。如果腰围降了但体重没怎么动，说明在掉脂增肌，这是最理想的。",
+  "💡 罗马尼亚硬拉如果动作稳了，可以加重或尝试传统硬拉。其它动作继续渐进加重。",
+  "💡 接近第一阶段尾声，保持强度别松懈。这周把每个动作的工作重量记进进步栏，方便下阶段对比。",
+  "💡 收官周，收尾有氧延长到20分钟。这周结束后根据8周的体重/腰围数据，制定第二阶段。",
+];
+const weekLabels = ["唤醒身体","建立节奏","加一点重量","稳住状态","中期检视","再进一步","冲刺前夜","收官加码"];
+
+// 每周4天日期 [周一,周二,周四,周五]
+const startDates = [
+  ["6/8","6/9","6/11","6/12"],
+  ["6/15","6/16","6/18","6/19"],
+  ["6/22","6/23","6/25","6/26"],
+  ["6/29","6/30","7/2","7/3"],
+  ["7/6","7/7","7/9","7/10"],
+  ["7/13","7/14","7/16","7/17"],
+  ["7/20","7/21","7/23","7/24"],
+  ["7/27","7/28","7/30","7/31"],
+];
+// 对应的实际日期 (2026年) 用于今日匹配
+const actualDates = [
+  [new Date(2026,5,8), new Date(2026,5,9), new Date(2026,5,11), new Date(2026,5,12)],
+  [new Date(2026,5,15), new Date(2026,5,16), new Date(2026,5,18), new Date(2026,5,19)],
+  [new Date(2026,5,22), new Date(2026,5,23), new Date(2026,5,25), new Date(2026,5,26)],
+  [new Date(2026,5,29), new Date(2026,5,30), new Date(2026,6,2), new Date(2026,6,3)],
+  [new Date(2026,6,6), new Date(2026,6,7), new Date(2026,6,9), new Date(2026,6,10)],
+  [new Date(2026,6,13), new Date(2026,6,14), new Date(2026,6,16), new Date(2026,6,17)],
+  [new Date(2026,6,20), new Date(2026,6,21), new Date(2026,6,23), new Date(2026,6,24)],
+  [new Date(2026,6,27), new Date(2026,6,28), new Date(2026,6,30), new Date(2026,6,31)],
+];
+const dayNames = ["周一","周二","周四","周五"];
+
+const weeks = weekLabels.map((label, wi) => {
+  const isLast = wi === 7;
+  const A = isLast ? upperA20 : upperA;
+  const B = isLast ? lowerB20 : lowerB;
+  return {
+    week: wi+1, label, tip: tips[wi],
+    days: [0,1,2,3].map(di => {
+      const isUpper = (di === 0 || di === 2);
+      return {
+        name: dayNames[di],
+        date: startDates[wi][di],
+        actualDate: actualDates[wi][di],
+        type: isUpper ? "chest" : "legs",
+        badge: isUpper ? "上肢 A" : "下肢 B",
+        exercises: isUpper ? "推 · 拉 · 肩 · 划船 · 臂 · 护肩" : "深蹲 · 罗马尼亚硬拉 · 腿辅助 · 核心",
+        detail: isUpper ? A : B,
+        meal: isUpper ? mealA : mealB,
+        milestone: (wi===7 && di===3) ? "🏆 第一阶段8周完成！称体重、量腰围、拍对比照，和6/8数据对比。" : null,
+      };
+    })
+  };
+});
+
+// ===== State =====
+function getDayId(wi, di) { return `w${wi}d${di}`; }
+function loadChecked() { try { return JSON.parse(localStorage.getItem('fitness_iphone')||'{}'); } catch { return {}; } }
+function saveChecked(d) { localStorage.setItem('fitness_iphone', JSON.stringify(d)); }
+let checked = loadChecked();
+
+// ===== Stats =====
+function updateStats() {
+  const done = Object.values(checked).filter(Boolean).length;
+  document.getElementById('done-count').textContent = done;
+  const pct = Math.round((done / 32) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-bar').style.width = pct + '%';
+  let streak = 0;
+  outer: for (let w = 0; w < weeks.length; w++) {
+    for (let d = 0; d < weeks[w].days.length; d++) {
+      if (checked[getDayId(w,d)]) streak++;
+      else break outer;
+    }
+  }
+  document.getElementById('streak-count').textContent = streak;
+}
+
+// ===== Today Page =====
+function findToday() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let wi = 0; wi < weeks.length; wi++) {
+    for (let di = 0; di < 4; di++) {
+      const d = actualDates[wi][di];
+      if (d.getTime() === today.getTime()) return { wi, di };
+    }
+  }
+  return null;
+}
+
+function renderToday() {
+  const dateEl = document.getElementById('today-date-txt');
+  const nameEl = document.getElementById('today-workout-name');
+  const badgeEl = document.getElementById('today-badge');
+  const wrapEl = document.getElementById('today-checkin-wrap');
+  const tipEl = document.getElementById('today-tip');
+
+  const now = new Date();
+  dateEl.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${['周日','周一','周二','周三','周四','周五','周六'][now.getDay()]}`;
+
+  const found = findToday();
+  if (!found) {
+    nameEl.textContent = "休息日";
+    badgeEl.innerHTML = '<span class="today-badge badge-rest">REST</span>';
+    wrapEl.innerHTML = '';
+    // Find current week tip
+    const now2 = new Date();
+    for (let wi = 0; wi < weeks.length; wi++) {
+      const first = actualDates[wi][0];
+      const last = actualDates[wi][3];
+      if (now2 >= first && now2 <= new Date(last.getTime() + 86400000*2)) {
+        tipEl.textContent = weeks[wi].tip;
+        break;
+      }
+    }
+    if (!tipEl.textContent) tipEl.textContent = "💡 今天是休息日，好好恢复！注意蛋白质摄入不要断。";
+    return;
+  }
+
+  const { wi, di } = found;
+  const day = weeks[wi].days[di];
+  const id = getDayId(wi, di);
+  const isDone = !!checked[id];
+
+  nameEl.textContent = `WEEK ${wi+1} · ${day.name}`;
+  badgeEl.innerHTML = `<span class="today-badge ${day.type==='chest'?'badge-upper':'badge-lower'}">${day.badge}</span>`;
+
+  wrapEl.innerHTML = `<button class="today-checkin-btn ${isDone?'done':''}" id="today-btn" onclick="todayCheckin(${wi},${di})">
+    ${isDone ? '✓ 已打卡' : '✓ 完成打卡'}
+  </button>`;
+
+  tipEl.textContent = weeks[wi].tip;
+}
+
+function todayCheckin(wi, di) {
+  const id = getDayId(wi, di);
+  checked[id] = !checked[id];
+  saveChecked(checked);
+  const btn = document.getElementById('today-btn');
+  if (btn) {
+    btn.className = 'today-checkin-btn ' + (checked[id] ? 'done' : '');
+    btn.textContent = checked[id] ? '✓ 已打卡' : '✓ 完成打卡';
+  }
+  // sync schedule page card
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.classList.toggle('done', !!checked[id]);
+    card.querySelector('.day-checkbox').textContent = checked[id] ? '✓' : '';
+  }
+  updateStats();
+  showToast(checked[id] ? '打卡成功！💪' : '已取消打卡');
+}
+
+// ===== Schedule Page =====
+function renderSchedule() {
+  const container = document.getElementById('weeks-container');
+  weeks.forEach((week, wi) => {
+    const doneInWeek = week.days.filter((_,di) => checked[getDayId(wi,di)]).length;
+    const sec = document.createElement('div');
+    sec.className = 'week-section';
+    sec.innerHTML = `<div class="week-header">
+      <div class="week-badge">WEEK ${week.week}</div>
+      <div class="week-title">${week.label}</div>
+      <div class="week-line"></div>
+      <div class="week-count">${doneInWeek}/4</div>
+    </div>`;
+
+    week.days.forEach((day, di) => {
+      const id = getDayId(wi, di);
+      const isDone = !!checked[id];
+      const card = document.createElement('div');
+      card.className = 'day-card' + (isDone ? ' done' : '');
+      card.id = 'card-' + id;
+
+      const exHTML = day.detail.map((e, i) => `
+        <div class="exercise-item">
+          <div class="ex-num">${i+1}</div>
+          <div class="ex-body">
+            <div class="ex-name">${e.name}</div>
+            ${e.note ? `<div class="ex-note">${e.note}</div>` : ''}
+          </div>
+          <div class="ex-sets">${e.sets}</div>
+        </div>`).join('');
+
+      const mealHTML = day.meal.map(m => `
+        <div class="meal-row">
+          <div class="meal-time">${m.time}</div>
+          <div class="meal-content">${m.content}</div>
+        </div>`).join('');
+
+      card.innerHTML = `
+        <div class="day-main" onclick="toggleExpand(${wi},${di})">
+          <div class="day-checkbox" onclick="event.stopPropagation();scheduleCheckin(${wi},${di})">${isDone?'✓':''}</div>
+          <div class="day-date">${day.date}</div>
+          <div class="day-info">
+            <div class="day-top">
+              <span class="day-name">${day.name}</span>
+              <span class="day-type-badge ${day.type==='chest'?'badge-chest':'badge-legs'}">${day.badge}</span>
+            </div>
+            <div class="day-exercises">${day.exercises}</div>
+          </div>
+          <div class="day-arrow">▶</div>
+        </div>
+        <div class="day-detail">
+          <div class="detail-section">
+            <div class="detail-title">训练内容</div>
+            <div class="exercise-list">${exHTML}</div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-title">今日饮食参考</div>
+            <div class="meal-box">${mealHTML}</div>
+          </div>
+          ${day.milestone ? `<div class="milestone-box">${day.milestone}</div>` : ''}
+          <div class="tip-box">${week.tip}</div>
+        </div>`;
+      sec.appendChild(card);
+    });
+    container.appendChild(sec);
+  });
+}
+
+function scheduleCheckin(wi, di) {
+  const id = getDayId(wi, di);
+  checked[id] = !checked[id];
+  saveChecked(checked);
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('done', !!checked[id]);
+  card.querySelector('.day-checkbox').textContent = checked[id] ? '✓' : '';
+  updateStats();
+  renderToday();
+  showToast(checked[id] ? '打卡成功！💪' : '已取消打卡');
+}
+
+function toggleExpand(wi, di) {
+  const card = document.getElementById('card-' + getDayId(wi, di));
+  card.classList.toggle('expanded');
+}
+
+// ===== Body Track =====
+const BASE_WEIGHT = 103.0, BASE_WAIST = 105.0;
+function loadLog() { try { return JSON.parse(localStorage.getItem('fitness_iphone_body')||'{}'); } catch { return {}; } }
+function saveLog(d) { localStorage.setItem('fitness_iphone_body', JSON.stringify(d)); }
+let bodyLog = loadLog();
+
+function addLog() {
+  const wk = document.getElementById('track-week').value;
+  const w = parseFloat(document.getElementById('track-w').value);
+  const wa = parseFloat(document.getElementById('track-wa').value);
+  if (isNaN(w) && isNaN(wa)) { showToast('请填写体重或腰围'); return; }
+  bodyLog[wk] = { w: isNaN(w)?null:w, wa: isNaN(wa)?null:wa };
+  saveLog(bodyLog);
+  document.getElementById('track-w').value = '';
+  document.getElementById('track-wa').value = '';
+  renderLog();
+  showToast('已记录 ✓');
+}
+
+function delLog(wk) {
+  delete bodyLog[wk];
+  saveLog(bodyLog);
+  renderLog();
+}
+
+function fmtDelta(cur, base) {
+  const d = +(cur - base).toFixed(1);
+  if (d < 0) return { cls:'delta-down', txt:'▼ '+Math.abs(d) };
+  if (d > 0) return { cls:'delta-up', txt:'▲ '+d };
+  return { cls:'delta-zero', txt:'±0' };
+}
+
+function renderLog() {
+  const wks = Object.keys(bodyLog).map(Number).sort((a,b)=>a-b);
+  let lastW = BASE_WEIGHT, lastWa = BASE_WAIST;
+  for (const k of wks) {
+    if (bodyLog[k].w!=null) lastW = bodyLog[k].w;
+    if (bodyLog[k].wa!=null) lastWa = bodyLog[k].wa;
+  }
+  document.getElementById('cur-weight').textContent = lastW.toFixed(1);
+  document.getElementById('cur-waist').textContent = lastWa.toFixed(1);
+
+  if (wks.length === 0) {
+    document.getElementById('weight-delta').className = 'base-delta delta-zero';
+    document.getElementById('weight-delta').textContent = '起点';
+    document.getElementById('waist-delta').className = 'base-delta delta-zero';
+    document.getElementById('waist-delta').textContent = '起点';
+    document.getElementById('track-log').innerHTML = '<div class="log-empty">还没有记录。起点：103kg / 105cm</div>';
+    return;
+  }
+
+  const dw = fmtDelta(lastW, BASE_WEIGHT);
+  const dwa = fmtDelta(lastWa, BASE_WAIST);
+  document.getElementById('weight-delta').className = 'base-delta ' + dw.cls;
+  document.getElementById('weight-delta').textContent = dw.txt + ' kg';
+  document.getElementById('waist-delta').className = 'base-delta ' + dwa.cls;
+  document.getElementById('waist-delta').textContent = dwa.txt + ' cm';
+
+  document.getElementById('track-log').innerHTML = wks.map(k => {
+    const e = bodyLog[k];
+    const parts = [];
+    if (e.w!=null) parts.push(e.w.toFixed(1)+' kg');
+    if (e.wa!=null) parts.push('腰 '+e.wa.toFixed(1)+' cm');
+    return `<div class="log-row">
+      <span class="log-week">W${k}</span>
+      <span class="log-data">${parts.join(' · ')}</span>
+      <span class="log-del" onclick="delLog(${k})">✕</span>
+    </div>`;
+  }).join('');
+}
+
+// ===== Reset =====
+function resetAll() {
+  if (!confirm('确定要清空所有打卡记录吗？')) return;
+  checked = {}; saveChecked(checked);
+  document.querySelectorAll('.day-card').forEach(c => {
+    c.classList.remove('done','expanded');
+    c.querySelector('.day-checkbox').textContent = '';
+  });
+  updateStats();
+  renderToday();
+  showToast('已重置');
+}
+
+// ===== Tab =====
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+}
+
+// ===== Toast =====
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ===== Init =====
+renderSchedule();
+renderToday();
+renderLog();
+updateStats();
+</script>
+</body>
+</html>
