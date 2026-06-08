@@ -68,6 +68,9 @@
   .meal-row:last-child { border-bottom:none; }
   .meal-time { color:var(--accent2); flex-shrink:0; width:48px; font-size:12px; font-weight:600; }
   .meal-content { color:var(--text); flex:1; line-height:1.5; }
+  .meal-kcal { font-size:10px; color:var(--accent2); margin-top:2px; }
+  .ex-optional { font-size:9px; color:var(--reward); background:rgba(251,191,36,0.15); padding:1px 6px; border-radius:5px; margin-left:4px; font-weight:700; }
+  .cal-target { font-size:11px; color:var(--accent2); margin-bottom:8px; padding:6px 10px; background:rgba(71,198,255,0.07); border-radius:8px; display:inline-block; }
   .step-goal { display:flex; align-items:center; gap:10px; font-size:14px; }
   .step-num { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--accent); }
 
@@ -271,9 +274,11 @@
         </div>
 
         <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--push)"></div>周一 Push（胸肩三头）· 周三 Pull（背二头）· 周五 Leg Day</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--rest)"></div>周二 / 周四 恢复日 · 周日 完全恢复，准备下周</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--reward)"></div>周六 奖励日 — 状态好可加练第四练（游泳/器械/哑铃任选），晚餐可放纵一餐（只放纵这一餐）</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--push)"></div>周一/周四 Push（胸肩三头）· 周二/周五 Pull（背二头）· 周三 Leg Day — 训练全部安排在工作日，顺路去 Anytime</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>慢跑改为「可选」：每次力量训练后 10-15 分钟，时间紧就跳过，用上下班通勤步数代替，不强求</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--reward)"></div>周六 游泳日 — 30-45分钟自由泳/蛙泳交替，换个方式动起来，强度自己掌握</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rest)"></div>周日 完全休息 — 散步采购洗衣，准备下周，晚上花2分钟填周报</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>饮食按「碳循环」：训练日高碳水 ~2300kcal（腿日略多），恢复/游泳日低-中碳水 ~1900kcal，蛋白质每天≥180g</div>
         </div>
 
         <div class="reset-card">
@@ -295,87 +300,116 @@
 
 <script>
 // ===== Weekly recurring template (Mon=0 ... Sun=6) =====
+// 碳循环饮食：训练日(高碳水 ~2300kcal / 蛋白≥180g) vs 恢复日(低碳水 ~1900kcal)
+// 训练日餐单 A（上肢 Push/Pull）
+const mealTrainUpper = [
+  { time:"早餐", content:"无糖希腊酸奶一大盒 + 香蕉 + 燕麦60g + 黑咖啡", kcal:"~420kcal · 蛋白32g" },
+  { time:"午餐", content:"烤鸡胸/烤鱼便当，米饭2/3盒 + 蛋白饮料1瓶", kcal:"~680kcal · 蛋白45g" },
+  { time:"加餐", content:"无糖酸奶 + 水果 或 蛋白粉1勺", kcal:"~220kcal · 蛋白25g" },
+  { time:"晚餐", content:"烤鸡/烤鱼/牛排定食，米饭半碗，蔬菜随意", kcal:"~750kcal · 蛋白50g" },
+  { time:"训后", content:"蛋白粉1勺 + 香蕉（可选，看是否饿）", kcal:"~230kcal · 蛋白25g" },
+];
+// 训练日餐单 B（Leg Day，碳水需求最高，米饭可以多吃一点）
+const mealTrainLeg = [
+  { time:"早餐", content:"无糖希腊酸奶 + 香蕉 + 燕麦80g + 黑咖啡", kcal:"~470kcal · 蛋白32g" },
+  { time:"午餐", content:"烤鲭鱼/牛肉定食，米饭一整份", kcal:"~750kcal · 蛋白48g" },
+  { time:"加餐", content:"饭团1个 + 蛋白饮料", kcal:"~280kcal · 蛋白22g" },
+  { time:"晚餐", content:"烤肉/牛排定食，米饭一碗，蔬菜多一点", kcal:"~800kcal · 蛋白52g" },
+  { time:"训后", content:"蛋白粉1勺", kcal:"~140kcal · 蛋白25g" },
+];
+// 恢复日餐单（低碳水，控制总量）
+const mealRest = [
+  { time:"早餐", content:"便利店サラダチキン + 水煮蛋1个 + 黑咖啡", kcal:"~320kcal · 蛋白34g" },
+  { time:"午餐", content:"そば/荞麦面 或 沙拉鸡，少量主食 + 蛋白饮料补到40g", kcal:"~520kcal · 蛋白40g" },
+  { time:"加餐", content:"无糖酸奶 或 蛋白粉1勺", kcal:"~180kcal · 蛋白22g" },
+  { time:"晚餐", content:"烤鱼/烤鸡定食，米饭半碗以内，蔬菜多一些", kcal:"~620kcal · 蛋白46g" },
+];
+// 周末游泳日餐单（中等碳水）
+const mealSwim = [
+  { time:"早餐", content:"无糖希腊酸奶 + 香蕉 + 燕麦60g + 黑咖啡", kcal:"~420kcal · 蛋白32g" },
+  { time:"午餐", content:"自由选择（外食/家做皆可），优先蛋白质 + 适量主食", kcal:"~650kcal · 蛋白40g" },
+  { time:"加餐", content:"游泳后 蛋白粉1勺 + 水果", kcal:"~230kcal · 蛋白25g" },
+  { time:"晚餐", content:"正常减脂晚餐，烤鸡/烤鱼 + 蔬菜 + 半碗饭", kcal:"~650kcal · 蛋白45g" },
+];
+// 周日（完全休息+准备）餐单，弹性，回归低碳
+const mealSunday = [
+  { time:"早餐", content:"自由（不必严格，但避免暴食）", kcal:"~400kcal" },
+  { time:"午餐", content:"正常吃，但选择优先蛋白质多一点的店", kcal:"~600kcal · 蛋白35g" },
+  { time:"晚餐", content:"回归减脂饮食：烤鱼/烤鸡 + 蔬菜 + 少量主食", kcal:"~600kcal · 蛋白45g" },
+];
+
+const cardio = { name:"训后慢跑（可选）", spec:"10-15分钟", optional:true,
+  note:"上班节奏紧不强求，时间够就慢跑放松+燃脂；没时间可跳过，用通勤步数代替" };
+
 const week = [
-  { name: "Push 推日", type: "push", badge: "Push · 胸肩三头",
+  { name: "Push 推日", type: "push", badge: "Push · 胸肩三头 · 工作日",
     exercises: [
       {name:"卧推", spec:"90kg×6×4"},
       {name:"上斜哑铃卧推", spec:"22kg×10×3"},
       {name:"哑铃肩推", spec:"14kg×10×3"},
       {name:"侧平举", spec:"8kg×15×3"},
       {name:"绳索下压", spec:"12×3"},
+      cardio,
     ],
-    meals: [
-      {time:"早餐", content:"蛋白粉1勺 + 牛奶300ml + 麦片60g + 香蕉1根"},
-      {time:"午餐", content:"大户屋 炭火烤鸡套餐，饭半份（田町）"},
-      {time:"下午", content:"Oikos 酸奶"},
-      {time:"晚餐", content:"711 沙拉鸡胸肉 + 饭团2个 + 味噌汤"},
-    ],
-    steps: "6000+", note: "07:00起床 → 07:30 Anytime"
+    meals: mealTrainUpper, calTarget:"训练日 · 目标 ~2300kcal · 高碳水",
+    steps: "6000+", note: "07:00起床 → 07:30 Anytime（公司附近，下班顺路）"
   },
-  { name: "恢复日", type: "rest", badge: "恢复 · 不健身",
-    exercises: [],
-    meals: [
-      {time:"早餐", content:"同周一（蛋白粉+牛奶+麦片+香蕉）"},
-      {time:"午餐", content:"松屋 牛烧肉定食，饭小份"},
-      {time:"下午", content:"蛋白饮料"},
-      {time:"晚餐", content:"烤鱼定食"},
-    ],
-    steps: "8000+", note: "午休在田町散步20分钟"
-  },
-  { name: "Pull 拉日", type: "pull", badge: "Pull · 背二头",
+  { name: "Pull 拉日", type: "pull", badge: "Pull · 背二头 · 工作日",
     exercises: [
       {name:"高位下拉", spec:"50kg×10×4"},
       {name:"单臂哑铃划船", spec:"10×4"},
       {name:"Face Pull", spec:"15×4"},
       {name:"二头弯举", spec:"12×3"},
       {name:"卷腹", spec:"15×3"},
+      cardio,
     ],
-    meals: [
-      {time:"早餐", content:"同周一"},
-      {time:"午餐", content:"FamilyMart 沙拉鸡 + 饭团 + 蛋白饮料"},
-      {time:"下午", content:"水果 / Oikos"},
-      {time:"晚餐", content:"やよい軒 烤鱼套餐"},
-    ],
-    steps: "6000+", note: ""
+    meals: mealTrainUpper, calTarget:"训练日 · 目标 ~2300kcal · 高碳水",
+    steps: "6000+", note: "面拉别漏，专治肩颈僵硬"
   },
-  { name: "完全休息", type: "rest", badge: "恢复 · 完全休息",
-    exercises: [],
-    meals: [
-      {time:"早餐", content:"Oikos ×2 + 咖啡"},
-      {time:"午餐", content:"牛丼 Light 加蛋"},
-      {time:"下午", content:"蛋白棒"},
-      {time:"晚餐", content:"萨莉亚 烤鸡 + 沙拉"},
-    ],
-    steps: "8000+", note: ""
-  },
-  { name: "Leg Day 腿日", type: "legs", badge: "Leg Day · 腿+核心",
+  { name: "Leg Day 腿日", type: "legs", badge: "Leg Day · 腿+核心 · 工作日",
     exercises: [
       {name:"深蹲", spec:"40kg×8×4"},
       {name:"腿举", spec:"80kg×12×4"},
       {name:"罗马尼亚硬拉", spec:"40kg×10×3"},
-      {name:"卷腹", spec:"3组"},
+      {name:"平板支撑", spec:"3×30-45秒"},
+      cardio,
     ],
-    meals: [
-      {time:"早餐", content:"同周一"},
-      {time:"午餐", content:"大户屋 烤鲭鱼套餐"},
-      {time:"下午", content:"Oikos"},
-      {time:"晚餐", content:"便利店自由组合，优先蛋白质"},
+    meals: mealTrainLeg, calTarget:"训练日（腿）· 目标 ~2300-2400kcal · 当天碳水可以稍微多一点",
+    steps: "6000+", note: "练腿日饭量可以比平时多一点，身体需要这些碳水来恢复"
+  },
+  { name: "Push 推日 B", type: "push", badge: "Push · 胸肩三头 · 工作日",
+    exercises: [
+      {name:"杠铃站姿肩推", spec:"3×12-15"},
+      {name:"哑铃平板卧推", spec:"4×12-15"},
+      {name:"哑铃俯身划船", spec:"3×12-15"},
+      {name:"哑铃弯举 + 三头下压", spec:"各3×12-15"},
+      {name:"面拉", spec:"3×15"},
+      cardio,
     ],
-    steps: "6000+", note: ""
+    meals: mealTrainUpper, calTarget:"训练日 · 目标 ~2300kcal · 高碳水",
+    steps: "6000+", note: "动作可与周一互换着做，避免枯燥"
   },
-  { name: "奖励日", type: "reward", badge: "可练可休 · 放纵一餐",
-    exercises: [ {name:"第四练（可选）", spec:"游泳/器械/哑铃任选"} ],
-    meals: [ {time:"晚餐", content:"放纵餐：岁岁红 / 火锅 / 烧肉 / 湘菜，都可以"} ],
-    steps: "—", note: "原则：只放纵这一餐。状态好就加练第四练，状态不好就好好休息"
+  { name: "Pull 拉日 B", type: "pull", badge: "Pull · 背二头 · 工作日",
+    exercises: [
+      {name:"杠铃俯身划船", spec:"3×12-15"},
+      {name:"哑铃单臂划船", spec:"4×12-15"},
+      {name:"哑铃过顶臂屈伸", spec:"3×12-15"},
+      {name:"哑铃俯身反向飞鸟", spec:"3×15"},
+      {name:"卷腹", spec:"3×15"},
+      cardio,
+    ],
+    meals: mealTrainUpper, calTarget:"训练日 · 目标 ~2300kcal · 高碳水",
+    steps: "6000+", note: "周五收尾，把这周训练画上句号"
   },
-  { name: "恢复 · 准备下周", type: "rest", badge: "恢复 · 采购洗衣",
+  { name: "游泳日", type: "reward", badge: "周末 · 游泳 · 中等碳水",
+    exercises: [ {name:"游泳", spec:"30-45分钟", note:"自由泳/蛙泳交替，强度自己掌握，重点是动起来"} ],
+    meals: mealSwim, calTarget:"游泳日 · 目标 ~1950kcal · 中等碳水",
+    steps: "8000+", note: "周末换个方式动一动，顺便逛逛街、采购"
+  },
+  { name: "完全休息 · 准备下周", type: "rest", badge: "恢复 · 不健身",
     exercises: [],
-    meals: [
-      {time:"早餐", content:"自由"},
-      {time:"午餐", content:"正常吃"},
-      {time:"晚餐", content:"回归减脂饮食"},
-    ],
-    steps: "10000+", note: "散步、采购、洗衣服、准备下周 + 晚上填写每周记录"
+    meals: mealSunday, calTarget:"恢复日 · 目标 ~1900kcal以内 · 低碳水",
+    steps: "10000+", note: "散步、采购、洗衣服、准备下周 + 晚上花2分钟填写每周记录"
   },
 ];
 const dayLabels = ["周一","周二","周三","周四","周五","周六","周日"];
@@ -439,11 +473,12 @@ function renderToday() {
     exCard.style.display = 'none';
   } else {
     exCard.style.display = '';
-    exWrap.innerHTML = day.exercises.map(e=>`<div class="ex-item"><span class="ex-name">${e.name}</span><span class="ex-spec">${e.spec}</span></div>`).join('');
+    exWrap.innerHTML = day.exercises.map(e=>`<div class="ex-item"><span class="ex-name">${e.name}${e.optional?'<span class="ex-optional">可选</span>':''}${e.note?`<div class="ex-note" style="font-size:11px;color:var(--muted);margin-top:2px">${e.note}</div>`:''}</span><span class="ex-spec">${e.spec}</span></div>`).join('');
   }
 
   document.getElementById('today-meals').innerHTML =
-    `<div class="meal-box">${day.meals.map(m=>`<div class="meal-row"><span class="meal-time">${m.time}</span><span class="meal-content">${m.content}</span></div>`).join('')}</div>`;
+    (day.calTarget ? `<div class="cal-target">🔥 ${day.calTarget}</div>` : '') +
+    `<div class="meal-box">${day.meals.map(m=>`<div class="meal-row"><span class="meal-time">${m.time}</span><span class="meal-content">${m.content}${m.kcal?`<div class="meal-kcal">${m.kcal}</div>`:''}</span></div>`).join('')}</div>`;
   document.getElementById('today-steps').textContent = day.steps;
   document.getElementById('today-note').textContent = day.note || '';
 }
@@ -470,9 +505,9 @@ function renderWeek() {
     card.id = 'wcard-' + di;
 
     const exHTML = day.exercises.length
-      ? `<div class="detail-section"><div class="detail-title">训练动作</div><div class="ex-list">${day.exercises.map(e=>`<div class="ex-item"><span class="ex-name">${e.name}</span><span class="ex-spec">${e.spec}</span></div>`).join('')}</div></div>`
+      ? `<div class="detail-section"><div class="detail-title">训练动作</div><div class="ex-list">${day.exercises.map(e=>`<div class="ex-item"><span class="ex-name">${e.name}${e.optional?'<span class="ex-optional">可选</span>':''}${e.note?`<div class="ex-note" style="font-size:11px;color:var(--muted);margin-top:2px">${e.note}</div>`:''}</span><span class="ex-spec">${e.spec}</span></div>`).join('')}</div></div>`
       : '';
-    const mealHTML = `<div class="detail-section"><div class="detail-title">饮食安排</div><div class="meal-box">${day.meals.map(m=>`<div class="meal-row"><span class="meal-time">${m.time}</span><span class="meal-content">${m.content}</span></div>`).join('')}</div></div>`;
+    const mealHTML = `<div class="detail-section"><div class="detail-title">饮食安排</div>${day.calTarget?`<div class="cal-target">🔥 ${day.calTarget}</div>`:''}<div class="meal-box">${day.meals.map(m=>`<div class="meal-row"><span class="meal-time">${m.time}</span><span class="meal-content">${m.content}${m.kcal?`<div class="meal-kcal">${m.kcal}</div>`:''}</span></div>`).join('')}</div></div>`;
     const noteHTML = day.note ? `<div class="detail-section" style="font-size:12px;color:var(--muted);">📝 ${day.note}</div>` : '';
 
     card.innerHTML = `
